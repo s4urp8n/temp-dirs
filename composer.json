@@ -1,0 +1,26 @@
+{
+  "name": "s4urp8n/temp-directory",
+  "description": "this is universal package template for development and testing",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "optimize-autoloader": true
+  },
+  "autoload": {
+    "psr-4": {
+      "": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "": "tests/"
+    }
+  },
+  "require": {
+    "ramsey/uuid": "^4.2"
+  },
+  "require-dev": {
+    "symfony/var-dumper": "*",
+    "phpunit/phpunit": "*"
+  }
+}
