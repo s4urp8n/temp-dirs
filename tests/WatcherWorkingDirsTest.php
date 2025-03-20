@@ -2,10 +2,10 @@
 
 use S4urp8n\TempDirectory\Watcher;
 
-class DirectoryWalkerWOrkingDirsTest extends PHPUnit\Framework\TestCase
+class WatcherWorkingDirsTest extends PHPUnit\Framework\TestCase
 {
 
-    public function testReset()
+    public function testResetAndSetAndAdd()
     {
         $thisDir = __DIR__;
         $aboveThisDir = dirname($thisDir);
@@ -25,6 +25,20 @@ class DirectoryWalkerWOrkingDirsTest extends PHPUnit\Framework\TestCase
 
         Watcher::getInstance()->resetWorkingDirectories();
         $this->assertEquals([], Watcher::getInstance()->getWorkingDirs());
+    }
+
+    public function testNotExistedDirSet()
+    {
+        $this->expectException(Exception::class);
+        $dir = __DIR__ . DIRECTORY_SEPARATOR . 'notexisted';
+        Watcher::getInstance()->setWorkingDirectories([$dir]);
+    }
+
+    public function testNotExistedDirAdd()
+    {
+        $this->expectException(Exception::class);
+        $dir = __DIR__ . DIRECTORY_SEPARATOR . 'notexisted';
+        Watcher::getInstance()->addWorkingDirectory($dir);
     }
 
 }

@@ -64,7 +64,11 @@ class Watcher
 
     public function setMinimumSpaceAvailableInDirectory($megabytes)
     {
-        $this->minimumSpaceAvailableInDirectory = $megabytes * 1024 * 1024;
+        if (!is_integer($megabytes) || $megabytes < 1) {
+            throw new \Exception('Megabytes must be an positive integer');
+        }
+
+        $this->minimumSpaceAvailableInDirectory = $megabytes;
         return $this;
     }
 
@@ -91,7 +95,7 @@ class Watcher
     {
         foreach ($this->workingDirs as $workingDir) {
             $freeSpaceInBytes = disk_free_space($workingDir);
-            if ($freeSpaceInBytes > $this->minimumSpaceAvailableInDirectory) {
+            if ($freeSpaceInBytes < $this->minimumSpaceAvailableInDirectory * 1024 * 1024) {
                 return $workingDir;
             }
         }
@@ -111,7 +115,13 @@ class Watcher
         $directories = scandir($workingDir, SCANDIR_SORT_NONE);
         foreach ($directories as $directory) {
 
+
             if ($directory == '.' || $directory == '..') {
+                continue;
+            }
+
+            $fullPath = $workingDir . DIRECTORY_SEPARATOR . $directory;
+            if (!is_dir($fullPath)) {
                 continue;
             }
 

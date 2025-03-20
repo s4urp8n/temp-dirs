@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit
-        convertErrorsToExceptions="true"
-        convertNoticesToExceptions="true"
-        convertWarningsToExceptions="true"
-        colors="true"
-        processIsolation="true"
-        stopOnFailure="true"
-        backupGlobals="false"
-        bootstrap="tests/bootstrap.php">
-    <testsuites>
-        <testsuite name="testsuite">
-            <directory suffix=".php">tests</directory>
-        </testsuite>
-    </testsuites>
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
-        </whitelist>
-    </filter>
-    <logging>
-        <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/>
-        <log type="coverage-clover" target="coverage/clover.xml" showUncoveredFiles="true"/>
-        <log type="coverage-html" target="coverage/html" showUncoveredFiles="true"/>
-    </logging>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" colors="true" processIsolation="true" stopOnFailure="true" backupGlobals="false" bootstrap="tests/bootstrap.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+  <coverage processUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+    <report>
+      <clover outputFile="coverage/clover.xml"/>
+      <html outputDirectory="coverage/html"/>
+      <text outputFile="php://stdout" showUncoveredFiles="true"/>
+    </report>
+  </coverage>
+  <testsuites>
+    <testsuite name="testsuite">
+      <directory suffix=".php">tests</directory>
+    </testsuite>
+  </testsuites>
+  <logging/>
 </phpunit>

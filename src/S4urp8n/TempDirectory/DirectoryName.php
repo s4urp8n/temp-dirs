@@ -16,31 +16,94 @@ class DirectoryName
     private $ttlMinutes;
     private $id;
 
-    private function __construct($prefix, $ttlMinutes)
+    private function checkEmpty($value, string $name)
     {
-        if (strpos($prefix, static::SEPARATOR) !== false) {
-            throw new \Exception(sprintf("Prefix '%s' cannot contain separator %s", $prefix, static::SEPARATOR));
+        if (!$value) {
+            throw new \Exception($name . " cannot be empty");
+        }
+    }
+
+    private function checkSeparator($value, string $name)
+    {
+        if (strpos($value, static::SEPARATOR) !== false) {
+            throw new \Exception(sprintf("%s '%s' cannot contain separator '%s'", $name, $value, static::SEPARATOR));
+        }
+    }
+
+    private function __construct(string $prefix, int $ttlMinutes)
+    {
+        $this->setPrefix($prefix);
+        $this->setTtlMinutes($ttlMinutes);
+        $this->setCreated(date(static::DATE_FORMAT));
+        $this->setId($this->generateGuid());
+    }
+
+    private function setCreated(string $created)
+    {
+        $this->checkEmpty($created, "Created");
+        $this->checkSeparator($created, "Created");
+
+        if (!$this->getDateTimeFromString($created)) {
+            throw new \Exception('Created must be a valid date in format=' . self::DATE_FORMAT);
         }
 
-        if (!$prefix) {
-            throw new \Exception("Prefix cannot be empty");
-        }
+        $this->created = $created;
 
-        if (!is_numeric($ttlMinutes) || $ttlMinutes <= 0) {
+        return $this;
+    }
+
+    private function setPrefix($prefix)
+    {
+        $this->checkEmpty($prefix, 'Prefix');
+        $this->checkSeparator($prefix, 'Prefix');
+
+
+        $this->prefix = $prefix;
+
+        return $this;
+    }
+
+
+    private function setTtlMinutes(int $ttlMinutes)
+    {
+        if (!is_int($ttlMinutes) || $ttlMinutes <= 0) {
             throw new \Exception("TtlMinutes must be a positive integer");
         }
 
-        $this->prefix = $prefix;
-        $this->created = date(static::DATE_FORMAT);
         $this->ttlMinutes = $ttlMinutes;
-        $this->id = str_replace(static::SEPARATOR, '', Uuid::uuid4()->toString());
+
+        return $this;
     }
 
-    public function __toString()
+    private function setId(string $id)
     {
-        return $this->getName();
+        $this->checkEmpty($id, "Id");
+        $this->checkSeparator($id, "Id");
+
+        $this->id = $id;
+
+        return $this;
     }
 
+    /**
+     * @return DateTime|null
+     */
+    private function getDateTimeFromString($date)
+    {
+        try {
+            $date = date_create_from_format(static::DATE_FORMAT, $date);
+            if ($date) {
+                return $date;
+            }
+        } catch (\Throwable $e) {
+
+        }
+        return null;
+    }
+
+    /**
+     * @return string
+     */
     public function getName()
     {
         return implode(static::SEPARATOR, [
@@ -54,7 +117,7 @@ class DirectoryName
 
     /**
      * @param $directory
-     * @return static
+     * @return static|null
      */
     public static function parse($directory)
     {
@@ -63,20 +126,17 @@ class DirectoryName
         try {
 
             $parts = explode(static::SEPARATOR, $directory);
+
             $prefix = $parts[1] ?? null;
             $created = $parts[2] ?? null;
             $ttlMinutes = $parts[3] ?? null;
             $id = $parts[4] ?? null;
 
             $parsed = new static($prefix, $ttlMinutes);
-            $parsed->prefix = $prefix;
-            $parsed->created = $created;
-            $parsed->ttlMinutes = $ttlMinutes;
-            $parsed->id = $id;
+            $parsed->setCreated($created);
+            $parsed->setId($id);
 
-            if ($parsed->isValid()) {
-                return $parsed;
-            }
+            return $parsed;
 
         } catch (\Throwable $e) {
 
@@ -86,56 +146,32 @@ class DirectoryName
     }
 
     /**
-     * @param string $prefix
-     * @param int $ttlMinutes
      * @return string
      */
-    public static function generate($prefix, $ttlMinutes)
+    public static function generate(string $prefix, int $ttlMinutes)
     {
-        return new self($prefix, $ttlMinutes) . '';
-    }
-
-    private function getCreatedDateTime()
-    {
-        try {
-            return date_create_from_format(static::DATE_FORMAT, $this->created);
-        } catch (\Throwable $e) {
-
-        }
-        return null;
-    }
-
-    private function isValid()
-    {
-        $empty = !$this->prefix
-            || !$this->created
-            || !$this->ttlMinutes
-            || !$this->id;
-
-        if ($empty) {
-            return false;
-        }
-
-        $parsedDate = $this->getCreatedDateTime();
-        if (!$parsedDate || !($parsedDate instanceof DateTime)) {
-            return false;
-        }
-
-        $ttlMinutes = intval($this->ttlMinutes);
-        if ($ttlMinutes <= 0) {
-            return false;
-        }
-
-        return true;
+        return (new self($prefix, $ttlMinutes))->getName();
     }
 
     public function isExpired()
     {
-        $parsedDate = $this->getCreatedDateTime();
+        $parsedDate = $this->getDateTimeFromString($this->created);
         $parsedDate->modify('+' . $this->ttlMinutes . ' minutes');
         $created = $parsedDate->getTimestamp();
         $now = (new DateTime())->getTimestamp();
+
         return $created < $now;
     }
+
+    private function generateGuid()
+    {
+        return str_replace(static::SEPARATOR, '', Uuid::uuid4()->toString());
+    }
+
+    public function __toString()
+    {
+        return $this->getName();
+    }
+
 
 }
