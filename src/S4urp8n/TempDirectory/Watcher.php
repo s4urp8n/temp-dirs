@@ -4,6 +4,12 @@ namespace S4urp8n\TempDirectory;
 
 class Watcher
 {
+
+    const MINUTES_IN_HOUR = 60;
+    const MINUTES_IN_DAY = self::MINUTES_IN_HOUR * 24;
+    const MINUTES_IN_WEEK = self::MINUTES_IN_DAY * 7;
+    const MINUTES_IN_MONTH = self::MINUTES_IN_DAY * 30;
+
     private static $instance;
     private $minimumSpaceAvailableInDirectory = 10 * 1024 * 1024 * 1024; //10 GB
     private $workingDirs = [];
