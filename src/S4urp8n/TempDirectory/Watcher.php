@@ -74,6 +74,8 @@ class Watcher
 
     public function createTempDirectory($prefix, $ttlMinutes, $permissions = 0777)
     {
+        $this->checkWorkingDirs();
+
         $workingDir = $this->getProperWorkingDir();
         while (true) {
             $name = DirectoryName::generate($prefix, $ttlMinutes);
@@ -103,8 +105,17 @@ class Watcher
         throw new \Exception('No working directories haven\'t enough space');
     }
 
+    private function checkWorkingDirs()
+    {
+        if (!$this->workingDirs) {
+            throw new \Exception('No working directories set');
+        }
+    }
+
     public function clearExpired()
     {
+        $this->checkWorkingDirs();
+
         foreach ($this->workingDirs as $workingDir) {
             $this->clearExpiredDirectory($workingDir);
         }
@@ -114,7 +125,6 @@ class Watcher
     {
         $directories = scandir($workingDir, SCANDIR_SORT_NONE);
         foreach ($directories as $directory) {
-
 
             if ($directory == '.' || $directory == '..') {
                 continue;
@@ -138,8 +148,12 @@ class Watcher
         }
     }
 
-    private function removeDirectory(string $directory)
+    public function removeDirectory(string $directory)
     {
+        if (!file_exists($directory)) {
+            return;
+        }
+
         $output = $exitCode = '';
         $arg = escapeshellarg($directory);
         $cmd = DIRECTORY_SEPARATOR === '\\'

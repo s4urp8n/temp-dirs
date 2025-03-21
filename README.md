@@ -1,21 +1,59 @@
-[![Build Status](https://travis-ci.org/s4urp8n/directory-walker.svg?branch=master)](https://travis-ci.org/s4urp8n/directory-walker)
-# Directory walker
+# Temporary directory creator and watcher
 
-This package helps you walk paths from current directory
+### Initial setup
 
-### Example of usage:
-
-curent dir is **/project**
+You need to set existed writeable working directories where temporary directories will be created.
+Also, you can set minimum free space to be available to use certain working directory.
+If there are no working directories with available space - exception will be thrown
 
 ```php
 <?php
-$path=DirectoryWalker::fromCurrent()
-                     ->enter('tests')          //  /project/tests/
-                     ->enter('unit/subunit\\') //  /project/tests/unit/subunit/
-                     ->up()                    //  /project/tests/unit/
-                     ->enter('sub\sub/unit/')  //  /project/tests/unit/sub/sub/unit/
-                     ->up(2)                   //  /project/tests/unit/sub/
-                     ->upUntil('tests')        //  /project/tests/
-                     ->get();
+//get instance of watcher 
+$watcher=\S4urp8n\TempDirectory\Watcher::getInstance();
+
+//set working directories
+$watcher->addWorkingDirectory('/path/to/directory')
+        ->addWorkingDirectory('/path/to/directory2');
+//or
+$watcher->setWorkingDirectories(['/path/to/directory2']); 
+        
+//set minimum free space
+$watcher->setMinimumSpaceAvailableInDirectory(20000); 
+
+?>
+```
+
+### Manual creation of temporary directories
+
+This code created a unique empty directory in one of the working directory you previously set
+
+```php
+<?php
+
+$watcher=\S4urp8n\TempDirectory\Watcher::getInstance();
+$expiredInMinutes=60;
+$fullPathToTemporaryDirectory=$watcher->createTempDirectory('somename', $expiredInMinutes);
+
+?>
+```
+
+### Deletion of manual created directory
+
+You can manually delete the created folder using its full path when you finish using it
+
+```php
+<?php
+$watcher=\S4urp8n\TempDirectory\Watcher::getInstance();
+$watcher->removeDirectory("/path to driectory");
+?>
+```
+
+### Deletion in cron or script
+
+You can run deletion of all expired temp directories using this code
+```php
+<?php
+$watcher=\S4urp8n\TempDirectory\Watcher::getInstance();
+$watcher->clearExpired();
 ?>
 ```
