@@ -102,7 +102,7 @@ class Watcher
             }
         }
 
-        throw new \Exception('No working directories haven\'t enough space');
+        throw new \Exception('No working directories having enough space');
     }
 
     private function checkWorkingDirs()
