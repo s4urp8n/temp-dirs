@@ -174,4 +174,24 @@ class Watcher
         }
     }
 
+    public function executeUsingTempDirectory(string $prefix, $callback, bool $removeAfterException = true)
+    {
+        if (!is_callable($callback)) {
+            throw new \Exception('Callback must be a callable function');
+        }
+
+        $tempDirectory = static::getInstance()->createTempDirectory($prefix, self::MINUTES_IN_YEAR);
+
+        try {
+            $result = $callback($tempDirectory);
+            $this->removeDirectory($tempDirectory);
+            return $result;
+        } catch (\Throwable $throwable) {
+            if ($removeAfterException) {
+                $this->removeDirectory($tempDirectory);
+            }
+            throw $throwable;
+        }
+    }
+
 }
