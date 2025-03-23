@@ -56,4 +56,23 @@ class WatcherCreateAndClearDirectoryTest extends PHPUnit\Framework\TestCase
         $this->assertTrue(count($this->getDirs(__DIR__)) == 0, 'clean of directory is not completed');
     }
 
+    public function testClearAfterExecutionNoException()
+    {
+        Watcher::getInstance()->addWorkingDirectory(__DIR__);
+        $directory = null;
+        Watcher::getInstance()
+            ->executeUsingTempDirectory('prefix', function ($tempdir) use (&$directory) {
+                $directory = $tempdir;
+
+                $this->assertNotEmpty($directory);
+                $this->assertNotEmpty($tempdir);
+                $this->assertTrue(file_exists($tempdir));
+                $this->assertTrue(is_writable($tempdir));
+                $this->assertTrue(is_dir($tempdir));
+            }, true);
+
+        $this->assertNotEmpty($directory);
+        $this->assertFalse(file_exists($directory));
+    }
+
 }
