@@ -1,7 +1,6 @@
 <?php
 
 use S4urp8n\TempDirectory\DirectoryName;
-use S4urp8n\TempDirectory\Watcher;
 
 class DirectoryNameTest extends PHPUnit\Framework\TestCase
 {

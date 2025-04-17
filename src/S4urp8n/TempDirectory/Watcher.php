@@ -5,15 +5,15 @@ namespace S4urp8n\TempDirectory;
 class Watcher
 {
 
-    const MINUTES_IN_HOUR = 60;
-    const MINUTES_IN_DAY = self::MINUTES_IN_HOUR * 24;
-    const MINUTES_IN_WEEK = self::MINUTES_IN_DAY * 7;
+    const MINUTES_IN_HOUR  = 60;
+    const MINUTES_IN_DAY   = self::MINUTES_IN_HOUR * 24;
+    const MINUTES_IN_WEEK  = self::MINUTES_IN_DAY * 7;
     const MINUTES_IN_MONTH = self::MINUTES_IN_DAY * 30;
-    const MINUTES_IN_YEAR = self::MINUTES_IN_DAY * 365;
+    const MINUTES_IN_YEAR  = self::MINUTES_IN_DAY * 365;
 
     private static $instance;
-    private $minimumSpaceAvailableInDirectory = 10 * 1024 * 1024 * 1024; //10 GB
-    private $workingDirs = [];
+    private        $minimumSpaceAvailableInDirectory = 10 * 1024 * 1024 * 1024; //10 GB
+    private        $workingDirs                      = [];
 
     /**
      * @return static
@@ -24,6 +24,11 @@ class Watcher
             static::$instance = new static();
         }
         return static::$instance;
+    }
+
+    public static function getNewInstance()
+    {
+        return new static();
     }
 
     private function __construct()
@@ -162,8 +167,8 @@ class Watcher
         }
 
         $output = $exitCode = '';
-        $arg = escapeshellarg($directory);
-        $cmd = DIRECTORY_SEPARATOR === '\\'
+        $arg    = escapeshellarg($directory);
+        $cmd    = DIRECTORY_SEPARATOR === '\\'
             ? sprintf('rmdir /s /q %s 2>&1', $arg)
             : sprintf('rm -rf %s 2>&1', $arg);
 
